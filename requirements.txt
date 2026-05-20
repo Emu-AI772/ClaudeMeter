@@ -1,0 +1,6 @@
+pystray
+Pillow
+requests
+pywebview
+pyinstaller
+winotify

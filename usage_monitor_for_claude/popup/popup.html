@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="popup.css">
+</head>
+<body>
+<header>
+    <span id="title"></span>
+    <div class="header-controls">
+        <button type="button" id="minimiseBtn" aria-label="Minimise" title="Compact view">&#8212;</button>
+        <button type="button" id="viewToggle" aria-label="Switch view" title="Settings">&#9881;</button>
+        <button type="button" id="closeBtn" aria-label="Close">&times;</button>
+    </div>
+</header>
+
+<!-- COMPACT / MINIMISED VIEW -->
+<section id="compactSection">
+    <div id="compactBars"></div>
+</section>
+
+<!-- Display mode selector (shown when settings gear is clicked) -->
+<div id="modeSelector" class="mode-selector hidden">
+    <span class="mode-label">Display Mode</span>
+    <div class="mode-buttons">
+        <button class="mode-btn active" data-mode="basic">Basic</button>
+        <button class="mode-btn" data-mode="dials">Dials</button>
+        <button class="mode-btn" data-mode="led">LED</button>
+    </div>
+    <span class="mode-label" style="margin-top:6px">View</span>
+    <div class="mode-buttons">
+        <button class="mode-btn active" data-view="usage">Usage</button>
+        <button class="mode-btn" data-view="history">History</button>
+    </div>
+    <div class="settings-row">
+        <span class="mode-label">Always on Top</span>
+        <label class="toggle-switch">
+            <input type="checkbox" id="aotToggle" checked>
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+    <div class="settings-row">
+        <span class="mode-label">Start with Windows</span>
+        <label class="toggle-switch">
+            <input type="checkbox" id="autostartToggle">
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+    <div class="settings-row" style="margin-top:6px">
+        <span class="mode-label">Window Position</span>
+    </div>
+    <div id="anchorGrid" class="anchor-grid-row">
+        <button class="anchor-btn" data-anchor="tl" title="Top Left">&#8598;</button>
+        <button class="anchor-btn" data-anchor="tr" title="Top Right">&#8599;</button>
+        <button class="anchor-btn" data-anchor="tray" title="Near Tray (default)">&#8862;</button>
+        <button class="anchor-btn" data-anchor="bl" title="Bottom Left">&#8601;</button>
+        <button class="anchor-btn" data-anchor="br" title="Bottom Right">&#8600;</button>
+    </div>
+    <div style="font-size:11px;color:var(--fg-dim);margin-top:4px">Drag the title bar to reposition freely</div>
+    <div class="settings-row" style="margin-top:6px">
+        <span class="mode-label">Colour Theme</span>
+    </div>
+    <div class="mode-buttons" id="themeButtons">
+        <button class="mode-btn active" data-theme="default">Default</button>
+        <button class="mode-btn" data-theme="system">System</button>
+        <button class="mode-btn" data-theme="traffic">Traffic</button>
+        <button class="mode-btn" data-theme="neon">Neon</button>
+        <button class="mode-btn" data-theme="minimal">Minimal</button>
+    </div>
+
+    <div class="settings-row" style="margin-top:6px">
+        <span class="mode-label">Custom Colours</span>
+        <button class="mode-btn" id="rgbToggleBtn" style="padding:3px 10px;font-size:11px">Edit</button>
+    </div>
+    <div id="rgbPicker" class="rgb-picker hidden">
+        <div class="rgb-row"><span>Background</span><input type="color" id="rgb_bg" value="#1e1e1e"></div>
+        <div class="rgb-row"><span>Bar fill</span><input type="color" id="rgb_bar_fg" value="#4a9eff"></div>
+        <div class="rgb-row"><span>Warning</span><input type="color" id="rgb_bar_fg_warn" value="#e05050"></div>
+        <div class="rgb-row"><span>Text</span><input type="color" id="rgb_fg" value="#cccccc"></div>
+        <div class="rgb-row"><span>Dim text</span><input type="color" id="rgb_fg_dim" value="#888888"></div>
+        <div style="display:flex;gap:6px;margin-top:6px">
+            <button class="mode-btn" id="rgbApplyBtn" style="flex:1;font-size:11px">Apply</button>
+            <button class="mode-btn" id="rgbResetBtn" style="flex:1;font-size:11px">Reset</button>
+        </div>
+    </div>
+
+    <div class="settings-row" style="margin-top:6px">
+        <span class="mode-label">Notifications</span>
+        <button class="mode-btn" id="testNotifyBtn" style="padding:3px 10px;font-size:11px">Test</button>
+    </div>
+    <div class="notify-options">
+        <div class="notify-row">
+            <span>Session alert at</span>
+            <div class="notify-input-wrap">
+                <input type="number" id="notifySessionPct" min="1" max="99" value="80" class="pct-input">
+                <span>%</span>
+            </div>
+        </div>
+        <div class="notify-row">
+            <span>Weekly alert at</span>
+            <div class="notify-input-wrap">
+                <input type="number" id="notifyWeeklyPct" min="1" max="99" value="80" class="pct-input">
+                <span>%</span>
+            </div>
+        </div>
+        <div class="settings-row" style="margin-top:4px">
+            <span>Notify on reset</span>
+            <label class="toggle-switch">
+                <input type="checkbox" id="notifyResetToggle">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <div id="historyFileRow" style="margin-top:6px">
+        <span class="mode-label">History Log</span>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+            <span id="historyPath" style="font-size:10px;color:var(--fg-dim);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+            <button id="openHistoryBtn" class="mode-btn" style="flex:0 0 auto;padding:3px 8px;font-size:11px">CSV</button>
+            <button id="openLogFolderBtn" class="mode-btn" style="flex:0 0 auto;padding:3px 8px;font-size:11px">&#128193;</button>
+            <button id="openSummaryBtn2" class="mode-btn" style="flex:0 0 auto;padding:3px 8px;font-size:11px" title="Daily summary">&#128200;</button>
+        </div>
+    </div>
+</div>
+
+
+<section id="accountSection">
+    <h2 id="headingAccount"></h2>
+    <dl>
+        <div id="emailRow">
+            <dt id="labelEmail"></dt>
+            <dd id="emailValue"></dd>
+        </div>
+        <div id="planRow">
+            <dt id="labelPlan"></dt>
+            <dd id="planValue"></dd>
+        </div>
+    </dl>
+</section>
+
+<!-- BASIC MODE -->
+<section id="usageSection">
+    <h2 id="headingUsage"></h2>
+    <div id="yesterdaySummary" class="yesterday-summary hidden"></div>
+    <div id="usageBars"></div>
+</section>
+
+<!-- DIALS MODE -->
+<section id="dialsSection">
+    <h2 id="headingUsageDials"></h2>
+    <div id="dialsContainer" class="dials-container"></div>
+</section>
+
+<!-- LED MODE -->
+<section id="ledSection">
+    <h2 id="headingUsageLed"></h2>
+    <div id="ledContainer" class="led-container"></div>
+</section>
+
+<!-- HISTORY VIEW -->
+<section id="historySection">
+    <h2>History</h2>
+    <div class="history-toolbar">
+        <div class="history-presets">
+            <button class="mode-btn hist-preset active" data-range="24h">24h</button>
+            <button class="mode-btn hist-preset" data-range="7d">7d</button>
+            <button class="mode-btn hist-preset" data-range="30d">30d</button>
+            <button class="mode-btn hist-preset" data-range="all">All</button>
+        </div>
+        <div class="history-dates">
+            <input type="date" id="histFrom" class="date-input" title="From">
+            <span style="color:var(--fg-dim);font-size:11px">→</span>
+            <input type="date" id="histTo" class="date-input" title="To">
+        </div>
+        <button class="mode-btn" id="exportCsvBtn" style="padding:3px 10px;font-size:11px">&#8681; CSV</button>
+        <button class="mode-btn" id="openSummaryBtn" style="padding:3px 10px;font-size:11px" title="Open daily summary CSV">&#128200;</button>
+    </div>
+    <div id="historyContainer" class="history-container"></div>
+</section>
+
+<section id="extraSection">
+    <h2 id="headingExtraUsage"></h2>
+    <div class="bar-header">
+        <span id="extraSpent"></span>
+        <span id="extraPct"></span>
+    </div>
+    <div class="bar-container">
+        <div class="bar-fill" id="extraFill"></div>
+    </div>
+</section>
+
+
+
+<section id="installSection">
+    <dl id="installRows" class="install-inline"></dl>
+</section>
+
+<footer id="statusSection">
+    <span id="statusText"></span>
+    <span id="appVersion"></span>
+</footer>
+
+<script src="popup.js"></script>
+</body>
+</html>
