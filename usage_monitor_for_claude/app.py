@@ -314,16 +314,20 @@ class UsageMonitorForClaude:
 
     def _on_update_found(self, version: str, url: str) -> None:
         """Called when a newer version is found on GitHub."""
+        import traceback
         try:
             from .notifications import _toast
             _toast(
                 f'ClaudeMeter v{version} available',
                 f'A new version is available. Right-click the tray icon to download.'
             )
+        except Exception:
+            traceback.print_exc()
+        try:
             # Refresh tray menu to show update item
             self.icon.update_menu()
         except Exception:
-            pass
+            traceback.print_exc()
 
     def _on_theme_changed(self) -> None:
         """Re-render the tray icon and popup when the Windows theme changes."""
@@ -826,8 +830,12 @@ class UsageMonitorForClaude:
                 threading.Thread(target=splash.close, daemon=True).start()
                 self._splash = None
 
-            # Check for updates silently in background
-            check_for_update(on_update_found=self._on_update_found)
+            # Check for updates silently in background (delay to let app settle)
+            def _delayed_update_check():
+                import time
+                time.sleep(5)
+                check_for_update(on_update_found=self._on_update_found)
+            threading.Thread(target=_delayed_update_check, daemon=True).start()
 
             self.poll_loop()
         except Exception:
